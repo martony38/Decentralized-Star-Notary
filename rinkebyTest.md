@@ -1,0 +1,15 @@
+# TxHash
+
+0x1e512e61eba3d8d1ea49c7c303e39c1bf8bfde13ecc79c843214343d1e7f6354
+
+# Star TokenID
+
+1
+
+# Contract Hash
+
+0x3926ba63a5c617c47869a2e75ba9a1442d0b1c07a8520e8a9e2cb7b7ead70ad2
+
+# Contract Address
+
+0xe73B694a2cd91967A0df400061086FfA69A1BCe1
