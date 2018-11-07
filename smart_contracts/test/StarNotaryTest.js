@@ -25,7 +25,6 @@ contract("StarNotary", accounts => {
         "dec_121.874",
         "mag_245.978",
         "ra_032.155",
-        1,
         { from: accounts[0] }
       );
     });
@@ -52,20 +51,83 @@ contract("StarNotary", accounts => {
   describe("test functions createStar() and tokenIdToStarInfo()", () => {
     beforeEach(async function() {
       await this.contract.createStar(
-        "awesome star!",
+        "1st awesome star!",
         "this is a star story",
         "dec_121.874",
         "mag_245.978",
         "ra_032.155",
-        1,
         { from: accounts[0] }
+      );
+      await this.contract.createStar(
+        "2nd awesome star!",
+        "this is another star story",
+        "dec_120.874",
+        "mag_240.978",
+        "ra_030.155",
+        { from: accounts[0] }
+      );
+    });
+
+    it("cannot create a star if inputs are missing", async function() {
+      await expectThrow(
+        this.contract.createStar(
+          "",
+          "this is a star story",
+          "dec_120.871",
+          "mag_140.978",
+          "ra_039.155",
+          { from: accounts[0] }
+        )
+      );
+      await expectThrow(
+        this.contract.createStar(
+          "A Star",
+          "",
+          "dec_120.871",
+          "mag_140.978",
+          "ra_039.155",
+          { from: accounts[0] }
+        )
+      );
+      await expectThrow(
+        this.contract.createStar(
+          "A Star",
+          "this is a star story",
+          "",
+          "mag_140.978",
+          "ra_039.155",
+          { from: accounts[0] }
+        )
+      );
+      await expectThrow(
+        this.contract.createStar(
+          "A Star",
+          "this is a star story",
+          "dec_120.871",
+          "",
+          "ra_039.155",
+          { from: accounts[0] }
+        )
+      );
+      await expectThrow(
+        this.contract.createStar(
+          "A Star",
+          "this is a star story",
+          "dec_120.871",
+          "mag_140.978",
+          "",
+          { from: accounts[0] }
+        )
+      );
+      await expectThrow(
+        this.contract.createStar("", "", "", "", "", { from: accounts[0] })
       );
     });
 
     it("can create a star and get its metadata", async function() {
       const starInfo = await this.contract.tokenIdToStarInfo(1);
       assert.deepEqual(starInfo, [
-        "awesome star!",
+        "1st awesome star!",
         "this is a star story",
         "dec_121.874",
         "mag_245.978",
@@ -76,15 +138,43 @@ contract("StarNotary", accounts => {
     it("cannot create a star with the same coordinates", async function() {
       await expectThrow(
         this.contract.createStar(
-          "awesome star!",
+          "1st awesome star!",
           "this is a star story",
           "dec_121.874",
           "mag_245.978",
           "ra_032.155",
-          2,
           { from: accounts[0] }
         )
       );
+    });
+
+    it("increments star ID correctly", async function() {
+      let starInfo = await this.contract.tokenIdToStarInfo(2);
+      assert.deepEqual(starInfo, [
+        "2nd awesome star!",
+        "this is another star story",
+        "dec_120.874",
+        "mag_240.978",
+        "ra_030.155"
+      ]);
+
+      await this.contract.createStar(
+        "3rd awesome star!",
+        "this is another star story",
+        "dec_100.874",
+        "mag_200.978",
+        "ra_030.155",
+        { from: accounts[0] }
+      );
+
+      starInfo = await this.contract.tokenIdToStarInfo(3);
+      assert.deepEqual(starInfo, [
+        "3rd awesome star!",
+        "this is another star story",
+        "dec_100.874",
+        "mag_200.978",
+        "ra_030.155"
+      ]);
     });
   });
 
@@ -103,7 +193,6 @@ contract("StarNotary", accounts => {
         "dec_121.874",
         "mag_245.978",
         "ra_032.155",
-        starId,
         { from: seller }
       );
     });

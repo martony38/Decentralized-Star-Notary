@@ -18,12 +18,18 @@ contract StarNotary is ERC721 {
     mapping(uint256 => Star) public tokenIdToStarInfo;
     mapping(uint256 => uint256) public starsForSale;
 
-    function createStar(string _name, string _story, string _dec, string _mag, string _ra, uint256 _tokenId) public {
+    function createStar(string _name, string _story, string _dec, string _mag, string _ra) public {
+        require(_checkBlankInputs(_name, _story, _dec, _mag, _ra) == true, "inputs missing");
         require(_checkIfStarExist(_dec, _mag, _ra) == false, "Star already exists");
 
+        // Create new star
         Star memory newStar = Star(_name, _story, _dec, _mag, _ra);
 
+        // Assign tokenID to newly created star
+        uint256 _tokenId = stars.length + 1;
         tokenIdToStarInfo[_tokenId] = newStar;
+
+        // Add newly created star to list of stars
         stars.push(newStar);
 
         _mint(msg.sender, _tokenId);
@@ -58,6 +64,19 @@ contract StarNotary is ERC721 {
         }
     }
 
+    function _checkBlankInputs(string _name, string _story, string _dec, string _mag, string _ra) internal pure returns (bool) {
+        // Check if any input string is empty
+        // See https://ethereum.stackexchange.com/questions/11039/how-can-you-check-if-a-string-is-empty-in-solidity#11040
+        if (bytes(_name).length == 0
+            || bytes(_story).length == 0
+            || bytes(_dec).length == 0
+            || bytes(_mag).length == 0
+            || bytes(_ra).length == 0) {
+            return false;
+        }
+        return true;
+    }
+
     function _checkIfStarExist(string _dec, string _mag, string _ra) internal view returns (bool) {
         for (uint index = 0; index < stars.length; index++) {
             // Use hash function to compare coordinates (use less gas)
@@ -72,9 +91,14 @@ contract StarNotary is ERC721 {
         return false;
     }
 
-    // Only used for testing
-    function publicCheckIfStarExist(string _dec, string _mag, string _ra) public view returns (bool) {
-        return _checkIfStarExist(_dec, _mag, _ra);
-    }
+    // Public function to expose internal function _checkIfStarExist to test suite.
+    // Uncomment following lines before running tests
+    //function publicCheckIfStarExist(string _dec, string _mag, string _ra) public view returns (bool) {
+    //    return _checkIfStarExist(_dec, _mag, _ra);
+    //}
+
+
+
+
 
 }
