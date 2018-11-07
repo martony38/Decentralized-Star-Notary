@@ -1,5 +1,7 @@
 # Decentralized Star Notary
 
+DApp notary service for stars built on the Ethereum platform: find stars, buy and sell stars or claim new ones.
+
 ## Installation
 
 Open terminal and cd to project directory.
