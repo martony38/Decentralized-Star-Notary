@@ -10,15 +10,13 @@ import {
   Section,
   Columns,
   Column,
-  Footer,
-  Content,
   Level,
   LevelItem
 } from "bloomer";
 import FindStar from "./components/FindStar";
 import ClaimStar from "./components/ClaimStar";
 import TransactionModal from "./components/TransactionModal";
-import {} from "drizzle/";
+import Credits from "./components/Credits";
 
 class AccountUpdater extends Component {
   componentDidMount() {
@@ -142,39 +140,7 @@ class App extends Component {
             </Columns>
           </Container>
         </Section>
-        <Footer>
-          <Container>
-            <Content>
-              <Columns>
-                <Column isSize="full">
-                  <p>
-                    Made by{" "}
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href="https://ls-portfolio.surge.sh"
-                    >
-                      ls
-                    </a>
-                  </p>
-                </Column>
-              </Columns>
-              <Content isSize="small">
-                <p>
-                  This work is licensed under{" "}
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://opensource.org/licenses/mit-license.php"
-                  >
-                    MIT
-                  </a>
-                  .
-                </p>
-              </Content>
-            </Content>
-          </Container>
-        </Footer>
+        <Credits />
         {showModal && (
           <DrizzleContext.Consumer>
             {drizzleContext => {
