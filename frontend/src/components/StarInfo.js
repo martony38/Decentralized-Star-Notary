@@ -7,11 +7,6 @@ import SellStar from "./SellStar";
 class StarInfo extends Component {
   state = { starInfoKey: null, starOwnerKey: null, starPriceKey: null };
 
-  componentDidMount() {
-    const { starId } = this.props;
-    this.setDataKeys(starId);
-  }
-
   setDataKeys = starId => {
     const { tokenIdToStarInfo, ownerOf, starsForSale } = this.props;
 
@@ -23,25 +18,20 @@ class StarInfo extends Component {
     this.setState({ starInfoKey, starOwnerKey, starPriceKey });
   };
 
-  shouldComponentUpdate(nextProps, nextState) {
-    if (nextProps.starId !== this.props.starId) {
-      this.setDataKeys(nextProps.starId);
-      return true;
+  componentDidMount() {
+    const { starId } = this.props;
+    this.setDataKeys(starId);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.starId !== prevProps.starId) {
+      this.setDataKeys(this.props.starId);
     }
-    if (nextProps.StarNotary !== this.props.StarNotary) {
-      return true;
-    }
-    if (nextProps.account !== this.props.account) {
-      return true;
-    }
-    return false;
   }
 
   render() {
     const { starId, StarNotary, account, toggleModal } = this.props;
     const { starInfoKey, starOwnerKey, starPriceKey } = this.state;
-
-    console.log(StarNotary);
 
     // Contract is not yet intialized.
     if (!StarNotary.initialized) {
@@ -80,7 +70,7 @@ class StarInfo extends Component {
             <Label isSize="small">Magnitude: {mag}</Label>
             <Label isSize="small">Right Ascension: {ra}</Label>
             <Label>Owner: {owner}</Label>
-            {owner === account ? (
+            {owner.toLowerCase() === account.toLowerCase() ? (
               <DrizzleContext.Consumer>
                 {drizzleContext => {
                   const { drizzle, drizzleState, initialized } = drizzleContext;
