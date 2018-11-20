@@ -11,11 +11,31 @@ import {
   Columns,
   Column,
   Footer,
-  Content
+  Content,
+  Level,
+  LevelItem
 } from "bloomer";
 import FindStar from "./components/FindStar";
 import ClaimStar from "./components/ClaimStar";
 import TransactionModal from "./components/TransactionModal";
+import {} from "drizzle/";
+
+class AccountUpdater extends Component {
+  componentDidMount() {
+    const { provider, dispatch } = this.props;
+
+    // Add callback that updates drizzle store when user changes account
+    // (see https://ethereum.stackexchange.com/questions/42768/how-can-i-detect-change-in-account-in-metamask)
+    provider.publicConfigStore.on("update", ({ selectedAddress }) => {
+      dispatch({ type: "ACCOUNTS_FETCHED", accounts: [selectedAddress] });
+    });
+  }
+  render() {
+    return null;
+  }
+}
+
+// TODO: Add loading screen if no web3 provider
 
 class App extends Component {
   state = {
@@ -35,6 +55,22 @@ class App extends Component {
 
     return (
       <div>
+        <DrizzleContext.Consumer>
+          {drizzleContext => {
+            const { drizzle, initialized } = drizzleContext;
+
+            if (!initialized) {
+              return "Loading...";
+            }
+
+            return (
+              <AccountUpdater
+                provider={drizzle.web3.currentProvider}
+                dispatch={drizzle.store.dispatch}
+              />
+            );
+          }}
+        </DrizzleContext.Consumer>
         <Hero isColor="dark" isBold isSize="small">
           <HeroBody>
             <Container>
@@ -48,6 +84,31 @@ class App extends Component {
         </Hero>
         <Section>
           <Container>
+            <Level>
+              <DrizzleContext.Consumer>
+                {drizzleContext => {
+                  const { drizzleState, initialized } = drizzleContext;
+
+                  if (!initialized) {
+                    return "Loading...";
+                  }
+
+                  const account = drizzleState.accounts[0];
+
+                  return (
+                    <LevelItem className="has-text-centered">
+                      <div>
+                        <strong>Current Account</strong>
+                        <p>{account}</p>
+                        <small>
+                          Not the account you expected? Try reloading the page
+                        </small>
+                      </div>
+                    </LevelItem>
+                  );
+                }}
+              </DrizzleContext.Consumer>
+            </Level>
             <Columns>
               <Column>
                 <FindStar toggleModal={this.toggleModal} />
@@ -87,7 +148,14 @@ class App extends Component {
               <Columns>
                 <Column isSize="full">
                   <p>
-                    Made by <a>ls</a>
+                    Made by{" "}
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href="https://ls-portfolio.surge.sh"
+                    >
+                      ls
+                    </a>
                   </p>
                 </Column>
               </Columns>
@@ -96,6 +164,7 @@ class App extends Component {
                   This work is licensed under{" "}
                   <a
                     target="_blank"
+                    rel="noopener noreferrer"
                     href="https://opensource.org/licenses/mit-license.php"
                   >
                     MIT
