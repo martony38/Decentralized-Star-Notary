@@ -31,7 +31,9 @@ class DrizzleConnectedTxModal extends Component {
               <p>Transaction Status</p>
             </MessageHeader>
             <MessageBody>
-              {status}
+              {status === null
+                ? "waiting for transaction to be confirmed by user..."
+                : status}
               {status === "success" && (
                 <Fragment>
                   <p>TxHash: {txHash}</p>
@@ -48,7 +50,9 @@ class DrizzleConnectedTxModal extends Component {
             </MessageBody>
           </Message>
         </ModalContent>
-        <ModalClose onClick={toggleActive} />
+        {[null, "success", "error"].includes(status) && (
+          <ModalClose onClick={toggleActive} />
+        )}
       </Modal>
     );
   }
@@ -72,6 +76,8 @@ const TxModal = ({ stackId, toggleActive }) => (
       const { transactions, transactionStack } = drizzleState;
       const txHash = transactionStack[stackId] || null;
 
+      console.log(transactionStack);
+
       return (
         <DrizzleConnectedTxModal
           toggleActive={toggleActive}
@@ -84,7 +90,7 @@ const TxModal = ({ stackId, toggleActive }) => (
 );
 
 TxModal.propTypes = {
-  stackId: PropTypes.string
+  stackId: PropTypes.number
 };
 
 export default TxModal;
