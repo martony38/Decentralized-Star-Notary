@@ -11,14 +11,25 @@ import {
   Columns,
   Column,
   Level,
-  LevelItem
+  Modal,
+  ModalBackground,
+  ModalContent,
+  Message,
+  MessageHeader,
+  MessageBody
 } from "bloomer";
 import FindStar from "./components/FindStar";
 import ClaimStar from "./components/ClaimStar";
-import TransactionModal from "./components/TransactionModal";
+import TxModal from "./components/TxModal";
 import Credits from "./components/Credits";
+import CurrentAccount from "./components/CurrentAccount";
 
-class AccountUpdater extends Component {
+class DrizzleConnectedApp extends Component {
+  state = {
+    showModal: false,
+    stackId: null
+  };
+
   componentDidMount() {
     const { provider, dispatch } = this.props;
 
@@ -28,18 +39,6 @@ class AccountUpdater extends Component {
       dispatch({ type: "ACCOUNTS_FETCHED", accounts: [selectedAddress] });
     });
   }
-  render() {
-    return null;
-  }
-}
-
-// TODO: Add loading screen if no web3 provider
-
-class App extends Component {
-  state = {
-    showModal: false,
-    stackId: null
-  };
 
   toggleModal = stackId => {
     this.setState(prevState => ({
@@ -53,22 +52,6 @@ class App extends Component {
 
     return (
       <div>
-        <DrizzleContext.Consumer>
-          {drizzleContext => {
-            const { drizzle, initialized } = drizzleContext;
-
-            if (!initialized) {
-              return "Loading...";
-            }
-
-            return (
-              <AccountUpdater
-                provider={drizzle.web3.currentProvider}
-                dispatch={drizzle.store.dispatch}
-              />
-            );
-          }}
-        </DrizzleContext.Consumer>
         <Hero isColor="dark" isBold isSize="small">
           <HeroBody>
             <Container>
@@ -83,89 +66,82 @@ class App extends Component {
         <Section>
           <Container>
             <Level>
-              <DrizzleContext.Consumer>
-                {drizzleContext => {
-                  const { drizzleState, initialized } = drizzleContext;
-
-                  if (!initialized) {
-                    return "Loading...";
-                  }
-
-                  const account = drizzleState.accounts[0];
-
-                  return (
-                    <LevelItem className="has-text-centered">
-                      <div>
-                        <strong>Current Account</strong>
-                        <p>{account}</p>
-                        <small>
-                          Not the account you expected? Try reloading the page
-                        </small>
-                      </div>
-                    </LevelItem>
-                  );
-                }}
-              </DrizzleContext.Consumer>
+              <CurrentAccount />
             </Level>
             <Columns>
               <Column>
                 <FindStar toggleModal={this.toggleModal} />
               </Column>
               <Column>
-                <DrizzleContext.Consumer>
-                  {drizzleContext => {
-                    const {
-                      drizzle,
-                      drizzleState,
-                      initialized
-                    } = drizzleContext;
-
-                    if (!initialized) {
-                      return "Loading...";
-                    }
-
-                    const { createStar } = drizzle.contracts.StarNotary.methods;
-                    const account = drizzleState.accounts[0];
-
-                    return (
-                      <ClaimStar
-                        toggleModal={this.toggleModal}
-                        createStar={createStar}
-                        account={account}
-                      />
-                    );
-                  }}
-                </DrizzleContext.Consumer>
+                <ClaimStar toggleModal={this.toggleModal} />
               </Column>
             </Columns>
           </Container>
         </Section>
         <Credits />
         {showModal && (
-          <DrizzleContext.Consumer>
-            {drizzleContext => {
-              const { drizzleState, initialized } = drizzleContext;
-
-              if (!initialized) {
-                return "Loading...";
-              }
-
-              const { transactions, transactionStack } = drizzleState;
-              const txHash = transactionStack[stackId] || null;
-
-              return (
-                <TransactionModal
-                  toggleActive={this.toggleModal}
-                  txHash={txHash}
-                  transaction={transactions[txHash]}
-                />
-              );
-            }}
-          </DrizzleContext.Consumer>
+          <TxModal stackId={stackId} toggleActive={this.toggleModal} />
         )}
       </div>
     );
   }
 }
+
+const App = () => (
+  <DrizzleContext.Consumer>
+    {drizzleContext => {
+      const { drizzle, drizzleState, initialized } = drizzleContext;
+
+      if (!initialized) {
+        if (!drizzleState || drizzleState.web3.status === "failed") {
+          return (
+            // Display a web3 warning.
+            <Modal isActive>
+              <ModalBackground />
+              <ModalContent>
+                <Message>
+                  <MessageHeader>
+                    <p>No connection to the Ethereum network</p>
+                  </MessageHeader>
+                  <MessageBody>
+                    <p>
+                      This browser has no connection to the Ethereum network.
+                      Please use the Chrome/FireFox extension MetaMask, or
+                      dedicated Ethereum browsers Mist or Parity.
+                    </p>
+                  </MessageBody>
+                </Message>
+              </ModalContent>
+            </Modal>
+          );
+        }
+        return (
+          // Display a loading indicator.
+          <Modal isActive>
+            <ModalBackground />
+            <ModalContent>
+              <Message>
+                <MessageHeader>
+                  <p>Loading dapp...</p>
+                </MessageHeader>
+                <MessageBody>
+                  <p>Connecting to the Ethereum network...</p>
+                </MessageBody>
+              </Message>
+            </ModalContent>
+          </Modal>
+        );
+      }
+
+      // Load the dapp.
+      return (
+        <DrizzleConnectedApp
+          provider={drizzle.web3.currentProvider}
+          dispatch={drizzle.store.dispatch}
+        />
+      );
+    }}
+  </DrizzleContext.Consumer>
+);
 
 export default App;

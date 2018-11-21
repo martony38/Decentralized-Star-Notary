@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from "react";
+import { DrizzleContext } from "drizzle-react";
 import PropTypes from "prop-types";
 import {
   Button,
@@ -11,7 +12,9 @@ import {
   MessageBody
 } from "bloomer";
 
-class TransactionModal extends Component {
+// TODO: Handle case when user cancel transaction from metamask
+
+class DrizzleConnectedTxModal extends Component {
   render() {
     const { transaction, txHash, toggleActive } = this.props;
 
@@ -51,10 +54,37 @@ class TransactionModal extends Component {
   }
 }
 
-TransactionModal.propTypes = {
+DrizzleConnectedTxModal.propTypes = {
   txHash: PropTypes.string,
   transaction: PropTypes.object,
   toggleActive: PropTypes.func.isRequired
 };
 
-export default TransactionModal;
+const TxModal = ({ stackId, toggleActive }) => (
+  <DrizzleContext.Consumer>
+    {drizzleContext => {
+      const { drizzleState, initialized } = drizzleContext;
+
+      if (!initialized) {
+        return "Loading...";
+      }
+
+      const { transactions, transactionStack } = drizzleState;
+      const txHash = transactionStack[stackId] || null;
+
+      return (
+        <DrizzleConnectedTxModal
+          toggleActive={toggleActive}
+          txHash={txHash}
+          transaction={transactions[txHash]}
+        />
+      );
+    }}
+  </DrizzleContext.Consumer>
+);
+
+TxModal.propTypes = {
+  stackId: PropTypes.string
+};
+
+export default TxModal;

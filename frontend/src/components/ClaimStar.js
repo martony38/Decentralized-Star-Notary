@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { DrizzleContext } from "drizzle-react";
 import PropTypes from "prop-types";
 import {
   Title,
@@ -12,7 +13,7 @@ import {
   FieldLabel
 } from "bloomer";
 
-class ClaimStar extends Component {
+class DrizzleConnectedClaimStar extends Component {
   state = {
     starName: "",
     starStory: "",
@@ -203,9 +204,36 @@ class ClaimStar extends Component {
   }
 }
 
-ClaimStar.propTypes = {
+DrizzleConnectedClaimStar.propTypes = {
   createStar: PropTypes.func.isRequired,
   account: PropTypes.string.isRequired,
+  toggleModal: PropTypes.func.isRequired
+};
+
+const ClaimStar = ({ toggleModal }) => (
+  <DrizzleContext.Consumer>
+    {drizzleContext => {
+      const { drizzle, drizzleState, initialized } = drizzleContext;
+
+      if (!initialized) {
+        return "Loading...";
+      }
+
+      const { createStar } = drizzle.contracts.StarNotary.methods;
+      const account = drizzleState.accounts[0];
+
+      return (
+        <DrizzleConnectedClaimStar
+          toggleModal={toggleModal}
+          createStar={createStar}
+          account={account}
+        />
+      );
+    }}
+  </DrizzleContext.Consumer>
+);
+
+ClaimStar.propTypes = {
   toggleModal: PropTypes.func.isRequired
 };
 
