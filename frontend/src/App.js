@@ -48,6 +48,7 @@ class DrizzleConnectedApp extends Component {
   };
 
   render() {
+    const { utils } = this.props;
     const { showModal, stackId } = this.state;
 
     return (
@@ -70,7 +71,7 @@ class DrizzleConnectedApp extends Component {
             </Level>
             <Columns>
               <Column>
-                <FindStar toggleModal={this.toggleModal} />
+                <FindStar toggleModal={this.toggleModal} utils={utils} />
               </Column>
               <Column>
                 <ClaimStar toggleModal={this.toggleModal} />
@@ -137,6 +138,7 @@ const App = () => (
       return (
         <DrizzleConnectedApp
           provider={drizzle.web3.currentProvider}
+          utils={drizzle.web3.utils}
           dispatch={drizzle.store.dispatch}
         />
       );

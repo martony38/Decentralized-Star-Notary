@@ -1,17 +1,8 @@
 import React, { Component } from "react";
 import { DrizzleContext } from "drizzle-react";
 import PropTypes from "prop-types";
-import {
-  Title,
-  Box,
-  Control,
-  Field,
-  Label,
-  Input,
-  Button,
-  FieldBody,
-  FieldLabel
-} from "bloomer";
+import { Title, Box, Control, Field, Label, Input, Button } from "bloomer";
+import StarCoordinates from "./StarCoordinates";
 
 class DrizzleConnectedClaimStar extends Component {
   state = {
@@ -22,24 +13,13 @@ class DrizzleConnectedClaimStar extends Component {
     starRa: ""
   };
 
-  formatCoordinates(coordinates) {
-    switch (coordinates.length) {
-      case 5:
-        return "dec_00" + coordinates;
-      case 6:
-        return "dec_0" + coordinates;
-      default:
-        return "dec_" + coordinates;
-    }
-  }
-
   claimStar = () => {
     const { starName, starStory, starDec, starMag, starRa } = this.state;
     const { createStar, account, toggleModal } = this.props;
 
-    const dec = this.formatCoordinates(Number(starDec).toFixed(3));
-    const mag = this.formatCoordinates(Number(starMag).toFixed(3));
-    const ra = this.formatCoordinates(Number(starRa).toFixed(3));
+    const dec = Number(starDec);
+    const mag = Number(starMag);
+    const ra = Number(starRa);
 
     const stackId = createStar.cacheSend(starName, starStory, dec, mag, ra, {
       from: account
@@ -52,16 +32,14 @@ class DrizzleConnectedClaimStar extends Component {
     this.setState({ [e.target.name]: e.target.value });
   };
 
+  setCoordinates = ({ dec, mag, ra }) => {
+    this.setState({ starDec: dec, starMag: mag, starRa: ra });
+  };
+
   render() {
     const { starName, starStory, starDec, starMag, starRa } = this.state;
 
     let disabled = false;
-    let starDecClass = "";
-    let starMagClass = "";
-    let starRaClass = "";
-    let errorDec = "";
-    let errorMag = "";
-    let errorRa = "";
 
     if (
       starName === "" ||
@@ -73,31 +51,9 @@ class DrizzleConnectedClaimStar extends Component {
       disabled = true;
     }
 
-    if (starDec !== "" && !/(^\d{1,3}[.]\d{0,}$|^\d{1,3}$)/.test(starDec)) {
-      starDecClass = "is-danger";
-      errorDec =
-        "Coordinates must be a number between 0 and 999.999 (rounded to 3 digits after the decimal point)";
-      disabled = true;
-    }
-
-    if (starMag !== "" && !/(^\d{1,3}[.]\d{0,}$|^\d{1,3}$)/.test(starMag)) {
-      starMagClass = "is-danger";
-      errorMag =
-        "Coordinates must be a number between 0 and 999.999 (rounded to 3 digits after the decimal point)";
-      disabled = true;
-    }
-
-    if (starRa !== "" && !/(^\d{1,3}[.]\d{0,}$|^\d{1,3}$)/.test(starRa)) {
-      starRaClass = "is-danger";
-      errorRa =
-        "Coordinates must be a number between 0 and 999.999 (rounded to 3 digits after the decimal point)";
-      disabled = true;
-    }
-
     return (
       <Box>
         <Title>Claim a New Star</Title>
-
         <Field>
           <Label>Star Name:</Label>
           <Control>
@@ -110,7 +66,6 @@ class DrizzleConnectedClaimStar extends Component {
             />
           </Control>
         </Field>
-
         <Field>
           <Label>Star Story:</Label>
           <Control>
@@ -123,72 +78,8 @@ class DrizzleConnectedClaimStar extends Component {
             />
           </Control>
         </Field>
-
         <Label>Star Coordinates:</Label>
-
-        <Field isHorizontal>
-          <FieldLabel isSize="small">
-            <Label>Declination:</Label>
-          </FieldLabel>
-          <FieldBody>
-            <Field>
-              <Control>
-                <Input
-                  type="text"
-                  placeholder="100.100"
-                  name="starDec"
-                  value={starDec}
-                  onChange={this.handleChange}
-                  className={starDecClass}
-                />
-              </Control>
-              {errorDec !== "" && <p className="help is-danger">{errorDec}</p>}
-            </Field>
-          </FieldBody>
-        </Field>
-
-        <Field isHorizontal>
-          <FieldLabel isSize="small">
-            <Label>Magnitude:</Label>
-          </FieldLabel>
-          <FieldBody>
-            <Field>
-              <Control>
-                <Input
-                  type="text"
-                  placeholder="100.100"
-                  name="starMag"
-                  value={starMag}
-                  onChange={this.handleChange}
-                  className={starMagClass}
-                />
-              </Control>
-              {errorMag !== "" && <p className="help is-danger">{errorMag}</p>}
-            </Field>
-          </FieldBody>
-        </Field>
-
-        <Field isHorizontal>
-          <FieldLabel isSize="small">
-            <Label>Right Ascension:</Label>
-          </FieldLabel>
-          <FieldBody>
-            <Field>
-              <Control>
-                <Input
-                  type="text"
-                  placeholder="100.100"
-                  name="starRa"
-                  value={starRa}
-                  onChange={this.handleChange}
-                  className={starRaClass}
-                />
-              </Control>
-              {errorRa !== "" && <p className="help is-danger">{errorRa}</p>}
-            </Field>
-          </FieldBody>
-        </Field>
-
+        <StarCoordinates setCoordinates={this.setCoordinates} />
         <Control>
           <Button
             isColor="primary"

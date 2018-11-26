@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from "react";
+import PropTypes from "prop-types";
 import { DrizzleContext } from "drizzle-react";
 import { Label } from "bloomer";
 import BuyStar from "./BuyStar";
@@ -17,6 +18,11 @@ class StarInfo extends Component {
 
     this.setState({ starInfoKey, starOwnerKey, starPriceKey });
   };
+
+  componentDidCatch(error, info) {
+    // You can also log the error to an error reporting service
+    console.log(error, info);
+  }
 
   componentDidMount() {
     const { starId } = this.props;
@@ -44,7 +50,7 @@ class StarInfo extends Component {
       !(starOwnerKey in StarNotary.ownerOf) ||
       !(starPriceKey in StarNotary.starsForSale)
     ) {
-      return <span>Fetching...</span>;
+      return <div style={{ marginTop: 20 }}>Fetching...</div>;
     }
 
     const { name, story, dec, mag, ra } = StarNotary.tokenIdToStarInfo[
@@ -55,20 +61,22 @@ class StarInfo extends Component {
 
     return (
       <div style={{ marginTop: 20 }}>
-        {name === "" &&
-        story === "" &&
-        dec === "" &&
-        mag === "" &&
-        ra === "" ? (
+        {name === "" ? (
           "No star found..."
         ) : (
           <Fragment>
             <Label>Name: {name}</Label>
             <Label>Story: {story}</Label>
             <Label>Star Coordinates:</Label>
-            <Label isSize="small">Declination: {dec}</Label>
-            <Label isSize="small">Magnitude: {mag}</Label>
-            <Label isSize="small">Right Ascension: {ra}</Label>
+            <Label isSize="small">
+              Declination: {(Number(dec) / 1000).toFixed(3)}
+            </Label>
+            <Label isSize="small">
+              Magnitude: {(Number(mag) / 1000).toFixed(3)}
+            </Label>
+            <Label isSize="small">
+              Right Ascension: {(Number(ra) / 1000).toFixed(3)}
+            </Label>
             <Label>Owner: {owner}</Label>
             {owner.toLowerCase() === account.toLowerCase() ? (
               <DrizzleContext.Consumer>
@@ -131,5 +139,15 @@ class StarInfo extends Component {
     );
   }
 }
+
+StarInfo.propTypes = {
+  tokenIdToStarInfo: PropTypes.func.isRequired,
+  ownerOf: PropTypes.func.isRequired,
+  starsForSale: PropTypes.func.isRequired,
+  toggleModal: PropTypes.func.isRequired,
+  starId: PropTypes.string.isRequired,
+  StarNotary: PropTypes.object.isRequired,
+  account: PropTypes.string.isRequired
+};
 
 export default StarInfo;

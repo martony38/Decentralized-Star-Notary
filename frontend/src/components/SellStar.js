@@ -43,7 +43,7 @@ class SellStar extends Component {
     } else */ if (
       newPrice === "" ||
       newPrice <= 0 ||
-      newPrice === price
+      Number(newPrice) === Number(price)
     ) {
       disabled = true;
     } else {
@@ -66,29 +66,31 @@ class SellStar extends Component {
           </FieldLabel>
           <FieldBody>
             <Field>
-              <Control>
-                <Input
-                  type="text"
-                  placeholder="100"
-                  onChange={this.handleChange}
-                  value={newPrice}
-                  className={error === "" ? "" : "is-danger"}
-                />
-              </Control>
+              <Field hasAddons>
+                <Control>
+                  <Input
+                    type="text"
+                    placeholder="100"
+                    onChange={this.handleChange}
+                    value={newPrice}
+                    className={error === "" ? "" : "is-danger"}
+                  />
+                </Control>
+                <Control isExpanded>
+                  <Button
+                    className="is-danger is-fullwidth"
+                    onClick={this.handleSubmit}
+                    disabled={disabled}
+                  >
+                    {Number(price) > 0 ? "Update Price" : "Sell Star"}
+                  </Button>
+                </Control>
+              </Field>
               {error !== "" && <p className="help is-danger">{error}</p>}
               <p className="help">Units: Wei</p>
             </Field>
           </FieldBody>
         </Field>
-        <Control>
-          <Button
-            className="is-danger is-fullwidth"
-            onClick={this.handleSubmit}
-            disabled={disabled}
-          >
-            {Number(price) > 0 ? "Update Price" : "Sell Star"}
-          </Button>
-        </Control>
       </Box>
     );
   }
