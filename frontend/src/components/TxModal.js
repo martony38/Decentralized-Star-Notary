@@ -12,8 +12,6 @@ import {
   MessageBody
 } from "bloomer";
 
-// TODO: Handle case when user cancel transaction from metamask
-
 class DrizzleConnectedTxModal extends Component {
   state = {
     status: null
@@ -34,7 +32,7 @@ class DrizzleConnectedTxModal extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { txHash, events, transaction } = this.props;
+    const { txHash, events, transaction, transactions } = this.props;
 
     if (events !== prevProps.events) {
       // transaction.status fail to update when creating a new star
@@ -47,6 +45,16 @@ class DrizzleConnectedTxModal extends Component {
       });
     } else if (transaction !== prevProps.transaction) {
       this.setState({ status: transaction.status });
+    } else if (
+      transactions !== prevProps.transactions &&
+      transactions.undefined &&
+      transactions.undefined.status === "error" &&
+      transactions.undefined.error.message.includes(
+        "MetaMask Tx Signature: User denied transaction signature"
+      )
+    ) {
+      // Update status when user cancel transaction from metamask
+      this.setState({ status: "canceled" });
     }
   }
 
@@ -72,6 +80,12 @@ class DrizzleConnectedTxModal extends Component {
                   <Button onClick={toggleActive}>Close</Button>
                 </Fragment>
               )}
+              {status === "canceled" && (
+                <Fragment>
+                  <p>Transaction canceled by user.</p>
+                  <Button onClick={toggleActive}>Close</Button>
+                </Fragment>
+              )}
               {status === "error" && (
                 <Fragment>
                   <p>Transaction failed.</p>
@@ -82,7 +96,7 @@ class DrizzleConnectedTxModal extends Component {
             </MessageBody>
           </Message>
         </ModalContent>
-        {[null, "success", "error"].includes(status) && (
+        {[null, "success", "canceled", "error"].includes(status) && (
           <ModalClose onClick={toggleActive} />
         )}
       </Modal>
@@ -94,7 +108,8 @@ DrizzleConnectedTxModal.propTypes = {
   txHash: PropTypes.string,
   transaction: PropTypes.object,
   toggleActive: PropTypes.func.isRequired,
-  events: PropTypes.array
+  events: PropTypes.array,
+  transactions: PropTypes.object
 };
 
 const TxModal = ({ stackId, toggleActive }) => (
@@ -116,6 +131,7 @@ const TxModal = ({ stackId, toggleActive }) => (
           txHash={txHash}
           transaction={transactions[txHash]}
           events={events}
+          transactions={transactions}
         />
       );
     }}
