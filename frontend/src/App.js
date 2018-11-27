@@ -33,11 +33,13 @@ class DrizzleConnectedApp extends Component {
   componentDidMount() {
     const { provider, dispatch } = this.props;
 
-    // Add callback that updates drizzle store when user changes account
-    // (see https://ethereum.stackexchange.com/questions/42768/how-can-i-detect-change-in-account-in-metamask)
-    provider.publicConfigStore.on("update", ({ selectedAddress }) => {
-      dispatch({ type: "ACCOUNTS_FETCHED", accounts: [selectedAddress] });
-    });
+    if (provider.isMetaMask) {
+      // Add callback that updates drizzle store when user changes account
+      // (see https://ethereum.stackexchange.com/questions/42768/how-can-i-detect-change-in-account-in-metamask)
+      provider.publicConfigStore.on("update", ({ selectedAddress }) => {
+        dispatch({ type: "ACCOUNTS_FETCHED", accounts: [selectedAddress] });
+      });
+    }
   }
 
   toggleModal = stackId => {
