@@ -23,6 +23,7 @@ import ClaimStar from "./components/ClaimStar";
 import TxModal from "./components/TxModal";
 import Credits from "./components/Credits";
 import CurrentAccount from "./components/CurrentAccount";
+import CurrentNetwork from "./components/CurrentNetwork";
 
 class DrizzleConnectedApp extends Component {
   state = {
@@ -70,6 +71,7 @@ class DrizzleConnectedApp extends Component {
           <Container>
             <Level>
               <CurrentAccount />
+              <CurrentNetwork />
             </Level>
             <Columns>
               <Column>
