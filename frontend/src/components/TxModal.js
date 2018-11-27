@@ -15,12 +15,44 @@ import {
 // TODO: Handle case when user cancel transaction from metamask
 
 class DrizzleConnectedTxModal extends Component {
+  state = {
+    status: null
+  };
+
+  componentDidMount() {
+    const { txHash, events, transaction } = this.props;
+
+    if (transaction && transaction.status) {
+      this.setState({ status: transaction.status });
+    }
+
+    events.forEach(event => {
+      if (event.transactionHash === txHash) {
+        this.setState({ status: "success" });
+      }
+    });
+  }
+
+  componentDidUpdate(prevProps) {
+    const { txHash, events, transaction } = this.props;
+
+    if (events !== prevProps.events) {
+      // transaction.status fail to update when creating a new star
+      // so we need to listen to the new StarCreation event and
+      // update status if TxHash match
+      events.forEach(event => {
+        if (event.transactionHash === txHash) {
+          this.setState({ status: "success" });
+        }
+      });
+    } else if (transaction !== prevProps.transaction) {
+      this.setState({ status: transaction.status });
+    }
+  }
+
   render() {
     const { transaction, txHash, toggleActive } = this.props;
-
-    const { status } = transaction || { status: null };
-
-    console.log(transaction);
+    const { status } = this.state;
 
     return (
       <Modal isActive>
@@ -61,7 +93,8 @@ class DrizzleConnectedTxModal extends Component {
 DrizzleConnectedTxModal.propTypes = {
   txHash: PropTypes.string,
   transaction: PropTypes.object,
-  toggleActive: PropTypes.func.isRequired
+  toggleActive: PropTypes.func.isRequired,
+  events: PropTypes.array
 };
 
 const TxModal = ({ stackId, toggleActive }) => (
@@ -75,14 +108,14 @@ const TxModal = ({ stackId, toggleActive }) => (
 
       const { transactions, transactionStack } = drizzleState;
       const txHash = transactionStack[stackId] || null;
-
-      console.log(transactionStack);
+      const { events } = drizzleState.contracts.StarNotary;
 
       return (
         <DrizzleConnectedTxModal
           toggleActive={toggleActive}
           txHash={txHash}
           transaction={transactions[txHash]}
+          events={events}
         />
       );
     }}

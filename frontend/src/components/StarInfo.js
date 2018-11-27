@@ -19,11 +19,6 @@ class StarInfo extends Component {
     this.setState({ starInfoKey, starOwnerKey, starPriceKey });
   };
 
-  componentDidCatch(error, info) {
-    // You can also log the error to an error reporting service
-    console.log(error, info);
-  }
-
   componentDidMount() {
     const { starId } = this.props;
     this.setDataKeys(starId);

@@ -12,7 +12,7 @@ import StarNotary from "./contracts/StarNotary.json";
 const options = {
   contracts: [StarNotary],
   events: {
-    StarNotary: ["Transfer"]
+    StarNotary: ["StarCreation"]
   }
 };
 const drizzleStore = generateStore(options);
