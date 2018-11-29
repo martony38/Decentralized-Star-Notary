@@ -28,7 +28,7 @@ const DrizzleConnectedCurrentNetwork = ({ networkId }) => {
   return (
     <LevelItem className="has-text-centered">
       <div>
-        <strong>Current Network</strong>
+        <strong>Current Ethereum Network</strong>
         <p>{network}</p>
       </div>
     </LevelItem>

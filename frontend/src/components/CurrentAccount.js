@@ -1,15 +1,8 @@
 import React, { Fragment } from "react";
 import { DrizzleContext } from "drizzle-react";
 import PropTypes from "prop-types";
-import {
-  LevelItem,
-  Modal,
-  ModalBackground,
-  ModalContent,
-  Message,
-  MessageBody,
-  MessageHeader
-} from "bloomer";
+import { LevelItem } from "bloomer";
+import NoConnection from "./NoConnection";
 
 const DrizzleConnectedCurrentAccount = ({ account }) => (
   <LevelItem className="has-text-centered">
@@ -18,7 +11,6 @@ const DrizzleConnectedCurrentAccount = ({ account }) => (
         <Fragment>
           <strong>Current Account</strong>
           <p>{account}</p>
-          <small>Not the account you expected? Try reloading the page</small>
         </Fragment>
       ) : (
         <Fragment>
@@ -29,25 +21,7 @@ const DrizzleConnectedCurrentAccount = ({ account }) => (
               you are logged in your account.
             </small>
           </p>
-          <Modal isActive>
-            <ModalBackground />
-            <ModalContent>
-              <Message>
-                <MessageHeader>
-                  <p>No account detected</p>
-                </MessageHeader>
-                <MessageBody>
-                  <p>
-                    This browser has no connection to the Ethereum network. Make
-                    sure your browser is connected to the Ethereum network and
-                    you are logged in your account. Please use the
-                    Chrome/FireFox extension MetaMask, or dedicated Ethereum
-                    browsers Mist or Parity.
-                  </p>
-                </MessageBody>
-              </Message>
-            </ModalContent>
-          </Modal>
+          <NoConnection />
         </Fragment>
       )}
     </div>

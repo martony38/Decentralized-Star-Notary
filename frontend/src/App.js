@@ -24,6 +24,7 @@ import TxModal from "./components/TxModal";
 import Credits from "./components/Credits";
 import CurrentAccount from "./components/CurrentAccount";
 import CurrentNetwork from "./components/CurrentNetwork";
+import NoConnection from "./components/NoConnection";
 
 class DrizzleConnectedApp extends Component {
   state = {
@@ -101,23 +102,7 @@ const App = () => (
         if (!drizzleState || drizzleState.web3.status === "failed") {
           return (
             // Display a web3 warning.
-            <Modal isActive>
-              <ModalBackground />
-              <ModalContent>
-                <Message>
-                  <MessageHeader>
-                    <p>No connection to the Ethereum network</p>
-                  </MessageHeader>
-                  <MessageBody>
-                    <p>
-                      This browser has no connection to the Ethereum network.
-                      Please use the Chrome/FireFox extension MetaMask, or
-                      dedicated Ethereum browsers Mist or Parity.
-                    </p>
-                  </MessageBody>
-                </Message>
-              </ModalContent>
-            </Modal>
+            <NoConnection />
           );
         }
         return (
