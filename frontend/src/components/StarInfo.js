@@ -57,7 +57,7 @@ class StarInfo extends Component {
     return (
       <div style={{ marginTop: 20 }}>
         {name === "" ? (
-          "No star found..."
+          <div>Nothing here but emptiness...</div>
         ) : (
           <Fragment>
             <Label>Name: {name}</Label>

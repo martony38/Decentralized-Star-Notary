@@ -12,9 +12,6 @@ import {
 
 class StarCoordinates extends Component {
   state = {
-    dec: "",
-    mag: "",
-    ra: "",
     decInputErrorMsg: null,
     magInputErrorMsg: null,
     raInputErrorMsg: null
@@ -22,7 +19,6 @@ class StarCoordinates extends Component {
 
   handleChange = e => {
     const { setCoordinates } = this.props;
-
     const input = e.target.value.replace(".", "");
 
     if (isNaN(Number(input)) || Number(input) < 0 || input.length > 6) {
@@ -31,9 +27,8 @@ class StarCoordinates extends Component {
         "InputErrorMsg"]: "Your last input was not valid and has been discarded, coordinates must be a number between 0 and 999.999 (rounded to 3 digits after the decimal point)"
       });
     } else {
-      setCoordinates({ ...this.state, [e.target.name]: input });
+      setCoordinates([e.target.name], input);
       this.setState({
-        [e.target.name]: input,
         [e.target.name + "InputErrorMsg"]: null
       });
     }
@@ -48,17 +43,11 @@ class StarCoordinates extends Component {
   };
 
   render() {
-    const {
-      dec,
-      mag,
-      ra,
-      decInputErrorMsg,
-      magInputErrorMsg,
-      raInputErrorMsg
-    } = this.state;
+    const { decInputErrorMsg, magInputErrorMsg, raInputErrorMsg } = this.state;
+    const { dec, mag, ra, style } = this.props;
 
     return (
-      <Box>
+      <Box style={style}>
         <Field isHorizontal>
           <FieldLabel isSize="small">
             <Label>Declination:</Label>
@@ -73,11 +62,11 @@ class StarCoordinates extends Component {
                   maxLength="7"
                   value={this.displayCoords(dec)}
                   onChange={this.handleChange}
-                  className={decInputErrorMsg ? "is-warning" : ""}
+                  className={decInputErrorMsg ? "is-danger" : ""}
                 />
               </Control>
               {decInputErrorMsg && (
-                <p className="help is-warning">{decInputErrorMsg}</p>
+                <p className="help is-danger">{decInputErrorMsg}</p>
               )}
             </Field>
           </FieldBody>
@@ -97,11 +86,11 @@ class StarCoordinates extends Component {
                   maxLength="7"
                   value={this.displayCoords(mag)}
                   onChange={this.handleChange}
-                  className={magInputErrorMsg ? "is-warning" : ""}
+                  className={magInputErrorMsg ? "is-danger" : ""}
                 />
               </Control>
               {magInputErrorMsg && (
-                <p className="help is-warning">{magInputErrorMsg}</p>
+                <p className="help is-danger">{magInputErrorMsg}</p>
               )}
             </Field>
           </FieldBody>
@@ -121,11 +110,11 @@ class StarCoordinates extends Component {
                   maxLength="7"
                   value={this.displayCoords(ra)}
                   onChange={this.handleChange}
-                  className={raInputErrorMsg ? "is-warning" : ""}
+                  className={raInputErrorMsg ? "is-danger" : ""}
                 />
               </Control>
               {raInputErrorMsg && (
-                <p className="help is-warning">{raInputErrorMsg}</p>
+                <p className="help is-danger">{raInputErrorMsg}</p>
               )}
             </Field>
           </FieldBody>
@@ -136,6 +125,9 @@ class StarCoordinates extends Component {
 }
 
 StarCoordinates.propTypes = {
+  dec: PropTypes.string,
+  mag: PropTypes.string,
+  ra: PropTypes.string,
   setCoordinates: PropTypes.func.isRequired
 };
 

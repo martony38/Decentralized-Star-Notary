@@ -8,22 +8,29 @@ class DrizzleConnectedClaimStar extends Component {
   state = {
     starName: "",
     starStory: "",
-    starDec: "",
-    starMag: "",
-    starRa: ""
+    dec: "",
+    mag: "",
+    ra: ""
   };
 
   claimStar = () => {
-    const { starName, starStory, starDec, starMag, starRa } = this.state;
+    const { starName, starStory, dec, mag, ra } = this.state;
     const { createStar, account, toggleModal } = this.props;
 
-    const dec = Number(starDec);
-    const mag = Number(starMag);
-    const ra = Number(starRa);
+    const starDec = Number(dec);
+    const starMag = Number(mag);
+    const starRa = Number(ra);
 
-    const stackId = createStar.cacheSend(starName, starStory, dec, mag, ra, {
-      from: account
-    });
+    const stackId = createStar.cacheSend(
+      starName,
+      starStory,
+      starDec,
+      starMag,
+      starRa,
+      {
+        from: account
+      }
+    );
 
     toggleModal(stackId);
   };
@@ -32,21 +39,23 @@ class DrizzleConnectedClaimStar extends Component {
     this.setState({ [e.target.name]: e.target.value });
   };
 
-  setCoordinates = ({ dec, mag, ra }) => {
-    this.setState({ starDec: dec, starMag: mag, starRa: ra });
+  setCoordinates = (name, value) => {
+    this.setState({
+      [name]: value
+    });
   };
 
   render() {
-    const { starName, starStory, starDec, starMag, starRa } = this.state;
+    const { starName, starStory, dec, mag, ra } = this.state;
 
     let disabled = false;
 
     if (
       starName === "" ||
       starStory === "" ||
-      starDec === "" ||
-      starMag === "" ||
-      starRa === ""
+      dec === "" ||
+      mag === "" ||
+      ra === ""
     ) {
       disabled = true;
     }
@@ -79,7 +88,12 @@ class DrizzleConnectedClaimStar extends Component {
           </Control>
         </Field>
         <Label>Star Coordinates:</Label>
-        <StarCoordinates setCoordinates={this.setCoordinates} />
+        <StarCoordinates
+          setCoordinates={this.setCoordinates}
+          dec={dec}
+          mag={mag}
+          ra={ra}
+        />
         <Control>
           <Button
             isColor="primary"

@@ -1,76 +1,243 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import PropTypes from "prop-types";
 import { DrizzleContext } from "drizzle-react";
-import { Title, Box, Control, Field, Label, Input, Button } from "bloomer";
+import {
+  Title,
+  Box,
+  Control,
+  Field,
+  Label,
+  Input,
+  Button,
+  FieldBody
+} from "bloomer";
 import StarInfo from "./StarInfo";
 import StarCoordinates from "./StarCoordinates";
 
 class FindStar extends Component {
   state = {
+    dec: "",
+    mag: "",
+    ra: "",
     starId: null,
-    input: ""
+    starIdHash: "",
+    showTokenId: false,
+    showCoordinates: false
+  };
+
+  toggleTokenId = () => {
+    this.setState(prevState => ({ showTokenId: !prevState.showTokenId }));
+  };
+
+  toggleCoordinates = () => {
+    this.setState(prevState => ({
+      showCoordinates: !prevState.showCoordinates
+    }));
   };
 
   handleSubmit = () => {
-    this.setState({ starId: this.state.input });
+    this.setState({ starId: this.state.starIdHash });
   };
 
   handleChange = e => {
-    const input = e.target.value;
-    this.setState({ input });
+    const { numberToHex } = this.props.utils;
+    const { dec, mag, ra } = this.state;
+
+    if (e.target.value === "") {
+      this.setState({ starIdHash: "" });
+    } else {
+      let input;
+
+      if (e.target.name === "inputId") {
+        // Check input is a number
+        if (/^\d*$/.test(e.target.value)) {
+          input = numberToHex(e.target.value);
+        }
+      } else {
+        input = e.target.value;
+      }
+
+      if (/(^0{0,1}$|^(0x|0X)[0-9a-fA-F]{0,64}$)/.test(input)) {
+        // Empty coordinates input fields if new hash does not correspond to
+        // coordinates.
+        if (this.coordinatesToHash({ dec, mag, ra }) !== input) {
+          this.setState({ dec: "", mag: "", ra: "" });
+        }
+
+        this.setState({ starIdHash: input });
+      }
+    }
   };
 
-  coordinatesToHash = ({ dec, mag, ra }) => {
-    const { padLeft, toHex, sha3 } = this.props.utils;
-
-    const hexCoordinates =
-      "0x" +
-      padLeft(toHex(dec).slice(2), 6) +
-      padLeft(toHex(mag).slice(2), 6) +
-      padLeft(toHex(ra).slice(2), 6);
-
+  setCoordinates = (name, value) => {
     this.setState({
-      input: sha3(hexCoordinates)
+      [name]: value,
+      starIdHash: this.coordinatesToHash({ ...this.state, [name]: value })
     });
   };
 
+  coordinatesToHash = ({ dec, mag, ra }) => {
+    const { padLeft, numberToHex, sha3 } = this.props.utils;
+
+    const hexCoordinates =
+      "0x" +
+      padLeft(numberToHex(dec).slice(2), 6) +
+      padLeft(numberToHex(mag).slice(2), 6) +
+      padLeft(numberToHex(ra).slice(2), 6);
+
+    return sha3(hexCoordinates);
+  };
+
   render() {
-    const { starId, input } = this.state;
-    const { toggleModal } = this.props;
+    const {
+      starId,
+      starIdHash,
+      dec,
+      mag,
+      ra,
+      showTokenId,
+      showCoordinates
+    } = this.state;
+    const {
+      toggleModal,
+      utils: { hexToNumberString }
+    } = this.props;
 
     let disabled = false;
-    let error = "";
+    //let error = null;
 
-    if (input === "") {
+    if (starIdHash === "") {
       disabled = true;
     } else {
-      if (!/^0x[0-9a-fA-F]{64}$/.test(input)) {
+      if (!/^(0x|0X)[0-9a-fA-F]{64}$/.test(starIdHash)) {
         disabled = true;
-        error = "Please enter a star Id hash";
+        //error = "Star Id hash is not valid";
       }
     }
 
     return (
-      <Box>
+      <Box style={{ position: "relative" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-end",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            position: "absolute",
+            top: "1.25rem",
+            right: "1.25rem"
+          }}
+        >
+          {!showTokenId && (
+            <Button
+              className="is-rounded"
+              style={{ margin: "0 0 0.5rem 0" }}
+              isSize="small"
+              isColor="dark"
+              onClick={this.toggleTokenId}
+            >
+              by Star ID
+            </Button>
+          )}
+          {!showCoordinates && (
+            <Button
+              className="is-rounded"
+              isSize="small"
+              isColor="dark"
+              onClick={this.toggleCoordinates}
+            >
+              by Coordinates
+            </Button>
+          )}
+        </div>
+
         <Title>Find a Star</Title>
+
+        {showTokenId && (
+          <Field>
+            <Label>By star token ID:</Label>
+            <FieldBody>
+              <Field hasAddons>
+                <Control isExpanded>
+                  <Input
+                    name="inputId"
+                    isSize="small"
+                    type="text"
+                    maxLength="78"
+                    className={disabled && starIdHash ? "is-danger" : ""}
+                    placeholder={hexToNumberString(
+                      this.coordinatesToHash({ dec, mag, ra })
+                    )}
+                    onChange={this.handleChange}
+                    value={hexToNumberString(starIdHash)}
+                  />
+                </Control>
+                <Control>
+                  <Button
+                    isSize="small"
+                    style={{ backgroundColor: "#e5e5e5" }}
+                    onClick={this.toggleTokenId}
+                  >
+                    Hide
+                  </Button>
+                </Control>
+              </Field>
+            </FieldBody>
+            {disabled && starIdHash && (
+              <p className="help is-danger">Token Id not valid</p>
+            )}
+          </Field>
+        )}
+
         <Field>
-          <Label>By star token ID (sha3 hash):</Label>
+          <Label>By Hash:</Label>
           <Control>
             <Input
+              name="starIdHash"
               isSize="small"
               type="text"
-              className={error === "" ? "" : "is-danger"}
-              placeholder="0x3e27a893dc40ef8a7f0841d96639de2f58a132be5ae466d40087a2cfa83b7174"
+              className={disabled && starIdHash ? "is-danger" : ""}
+              placeholder={this.coordinatesToHash({ dec, mag, ra })}
               onChange={this.handleChange}
-              value={input}
+              value={starIdHash}
             />
           </Control>
-          {error !== "" && <p className="help is-danger">{error}</p>}
+          {disabled && starIdHash && (
+            <p className="help is-danger">Hash not valid</p>
+          )}
         </Field>
 
-        <Label>By star coordinates:</Label>
-
-        <StarCoordinates setCoordinates={this.coordinatesToHash} />
+        {showCoordinates && (
+          <Fragment>
+            <Label>By Coordinates:</Label>
+            <div style={{ position: "relative" }}>
+              {showCoordinates && (
+                <Button
+                  style={{
+                    position: "absolute",
+                    top: "-1.75rem",
+                    right: 0,
+                    borderBottomRightRadius: 0,
+                    borderBottomLeftRadius: 0,
+                    backgroundColor: "#e5e5e5",
+                    borderColor: "transparent"
+                  }}
+                  isSize="small"
+                  onClick={this.toggleCoordinates}
+                >
+                  Hide
+                </Button>
+              )}
+            </div>
+            <StarCoordinates
+              style={{ borderTopRightRadius: 0 }}
+              setCoordinates={this.setCoordinates}
+              dec={dec}
+              mag={mag}
+              ra={ra}
+            />
+          </Fragment>
+        )}
 
         <Control>
           <Button
@@ -122,7 +289,7 @@ FindStar.propTypes = {
   toggleModal: PropTypes.func.isRequired,
   utils: PropTypes.shape({
     padLeft: PropTypes.func.isRequired,
-    toHex: PropTypes.func.isRequired,
+    numberToHex: PropTypes.func.isRequired,
     sha3: PropTypes.func.isRequired
   })
 };
