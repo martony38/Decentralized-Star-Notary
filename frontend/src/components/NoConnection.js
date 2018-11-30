@@ -20,7 +20,8 @@ const NoConnection = () => (
           <p>
             This browser has no connection to the Ethereum network. Make sure
             your browser is connected to the Rinkeby test network and you are
-            logged in your account. Please use the Chrome/FireFox extension{" "}
+            logged in your account. Please use the Chrome/FireFox/Opera
+            extension{" "}
             <a
               href="https://metamask.io/"
               target="_blank"
