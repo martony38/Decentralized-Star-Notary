@@ -19,8 +19,8 @@ const NoConnection = () => (
         <MessageBody>
           <p>
             This browser has no connection to the Ethereum network. Make sure
-            your browser is connected to the Ethereum network and you are logged
-            in your account. Please use the Chrome/FireFox extension{" "}
+            your browser is connected to the Rinkeby test network and you are
+            logged in your account. Please use the Chrome/FireFox extension{" "}
             <a
               href="https://metamask.io/"
               target="_blank"
@@ -28,7 +28,7 @@ const NoConnection = () => (
             >
               MetaMask
             </a>
-            , or dedicated Ethereum browsers{" "}
+            {/*, or dedicated Ethereum browsers{" "}
             <a
               href="https://electronjs.org/apps/mist"
               target="_blank"
@@ -43,7 +43,7 @@ const NoConnection = () => (
               rel="noopener noreferrer"
             >
               Parity
-            </a>
+            </a>*/}
             .
           </p>
         </MessageBody>
