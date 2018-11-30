@@ -14,7 +14,8 @@ import {
 
 class DrizzleConnectedTxModal extends Component {
   state = {
-    status: null
+    status: null,
+    tokenId: null
   };
 
   componentDidMount() {
@@ -35,12 +36,13 @@ class DrizzleConnectedTxModal extends Component {
     const { txHash, events, transaction, transactions } = this.props;
 
     if (events !== prevProps.events) {
+      console.log(events);
       // transaction.status fail to update when creating a new star
       // so we need to listen to the new StarCreation event and
       // update status if TxHash match
       events.forEach(event => {
         if (event.transactionHash === txHash) {
-          this.setState({ status: "success" });
+          this.setState({ status: "success", tokenId: event.returnValues[0] });
         }
       });
     } else if (transaction !== prevProps.transaction) {
@@ -58,39 +60,104 @@ class DrizzleConnectedTxModal extends Component {
     }
   }
 
+  copyToken = () => {
+    const { tokenId } = this.state;
+    const { toHex } = this.props;
+
+    if (!navigator.clipboard) {
+      // TODO: Display error message
+      console.log("cannot copy to clipboard");
+      return;
+    }
+
+    navigator.clipboard.writeText(toHex(tokenId)).then(
+      function() {
+        // TODO: Display success message
+        console.log("Async: Copying to clipboard was successful!");
+      },
+      function(err) {
+        // TODO: Display error message
+        console.error("Async: Could not copy text: ", err);
+      }
+    );
+  };
+
   render() {
-    const { transaction, txHash, toggleActive } = this.props;
-    const { status } = this.state;
+    const { transaction, txHash, toggleActive, toHex } = this.props;
+    const { status, tokenId } = this.state;
 
     return (
       <Modal isActive>
         <ModalBackground />
         <ModalContent>
-          <Message>
+          <Message
+            isColor={
+              !status
+                ? "dark"
+                : status === "pending"
+                ? "info"
+                : status === "success"
+                ? "success"
+                : status === "canceled"
+                ? "warning"
+                : "danger"
+            }
+          >
             <MessageHeader>
-              <p>Transaction Status</p>
+              {status === null ? (
+                <p>Waiting for transaction confirmation...</p>
+              ) : (
+                <p>Transaction Status: {status}</p>
+              )}
             </MessageHeader>
             <MessageBody>
-              {status === null
-                ? "waiting for transaction to be confirmed by user..."
-                : status}
+              {!status && (
+                <p>
+                  Please use your Ethereum provider to confirm or cancel
+                  transaction.
+                </p>
+              )}
+              {status === "pending" && (
+                <Fragment>
+                  <p>Please wait...</p>
+                </Fragment>
+              )}
               {status === "success" && (
                 <Fragment>
-                  <p>TxHash: {txHash}</p>
-                  <Button onClick={toggleActive}>Close</Button>
+                  <p>TxHash:</p>
+                  <small>{txHash}</small>
+                  {/* TODO: extend modal window to display token */}
+                  {tokenId && (
+                    <Fragment>
+                      <p>Star Token Id:</p>
+                      <small>{tokenId}</small>
+                      <p>Star Token Id Hash:</p>
+                      <small>{toHex(tokenId)}</small>
+                      <Button isColor="info" onClick={this.copyToken}>
+                        Copy hash to clipboard
+                      </Button>
+                    </Fragment>
+                  )}
+                  <Button isColor="danger" onClick={toggleActive}>
+                    Close
+                  </Button>
                 </Fragment>
               )}
               {status === "canceled" && (
                 <Fragment>
                   <p>Transaction canceled by user.</p>
-                  <Button onClick={toggleActive}>Close</Button>
+                  <Button isColor="danger" onClick={toggleActive}>
+                    Close
+                  </Button>
                 </Fragment>
               )}
               {status === "error" && (
                 <Fragment>
                   <p>Transaction failed.</p>
                   <p>{transaction.error}</p>
-                  <Button onClick={toggleActive}>Close</Button>
+                  <Button isColor="danger" onClick={toggleActive}>
+                    Close
+                  </Button>
                 </Fragment>
               )}
             </MessageBody>
@@ -115,7 +182,7 @@ DrizzleConnectedTxModal.propTypes = {
 const TxModal = ({ stackId, toggleActive }) => (
   <DrizzleContext.Consumer>
     {drizzleContext => {
-      const { drizzleState, initialized } = drizzleContext;
+      const { drizzle, drizzleState, initialized } = drizzleContext;
 
       if (!initialized) {
         return "Loading...";
@@ -124,6 +191,7 @@ const TxModal = ({ stackId, toggleActive }) => (
       const { transactions, transactionStack } = drizzleState;
       const txHash = transactionStack[stackId] || null;
       const { events } = drizzleState.contracts.StarNotary;
+      const { toHex } = drizzle.web3.utils;
 
       return (
         <DrizzleConnectedTxModal
@@ -132,6 +200,7 @@ const TxModal = ({ stackId, toggleActive }) => (
           transaction={transactions[txHash]}
           events={events}
           transactions={transactions}
+          toHex={toHex}
         />
       );
     }}
